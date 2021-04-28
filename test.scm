@@ -14,14 +14,15 @@
 (define suite-prefix '())
 
 
-(define (assert-equal-internal? left right mleft mright cl)
- (unless (equal? left right)
-   (test-cont (cons #f (format #f (string-append
-                                   "Left: ~A -> ~A != Right ~A -> ~A~%"
-                                   "On line ~A of ~A~%")
-                               mleft left mright right
-                               (cdr (assoc 'line cl))
-                               (cdr (assoc 'filename cl)))))))
+(define (assert-equal-internal? eq left right mleft mright cl)
+  (unless (eq left right)
+    (test-cont (cons #f (format #f (string-append
+                                    "Left: ~S -> ~S != Right ~S -> ~S~%"
+                                    "On line ~A of ~A~%")
+                                mleft left mright right
+                                (cdr (assoc 'line cl))
+                                (cdr (assoc 'filename cl)))))))
+
 
 (define (assert-internal val mval cl)
  (unless val
@@ -32,8 +33,12 @@
                                (cdr (assoc 'line cl))
                                (cdr (assoc 'filename cl)))))))
 
-(define-syntax-rule (assert-equal? left right)
-  (assert-equal-internal? left right 'left 'right (current-source-location)))
+(define-syntax assert-equal?
+  (syntax-rules ()
+    ((_ left right)
+     (assert-equal-internal? equal? left right 'left 'right (current-source-location)))
+    ((_ eq left right)
+     (assert-equal-internal? eq left right 'left 'right (current-source-location)))))
 
 (define-syntax-rule (assert exp)
   (assert-internal exp 'exp (current-source-location)))
